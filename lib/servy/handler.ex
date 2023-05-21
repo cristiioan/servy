@@ -8,12 +8,14 @@ defmodule Servy.Handler do
   import Servy.Parser, only: [parse: 1]
   import Servy.FileHandler, only: [handle_file: 2]
   import Servy.Conv, only: [status_full: 1, put_content_length: 1]
+  import Servy.View, only: [render: 3]
 
   alias Servy.Conv
   alias Servy.BearController
   alias Servy.Api
   alias Servy.VideoCam
   alias Servy.Tracker
+
 
   @doc "Transforms the request into a response"
   def handle(request) do
@@ -37,7 +39,9 @@ defmodule Servy.Handler do
       |> Enum.map(&Task.async(fn -> VideoCam.get_snapshot(&1) end))
       |> Enum.map(&Task.await/1)
 
-    %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
+    resp_body = render(conv, "sensors.eex", snapshots: snapshots, location: where_is_bigfoot)
+
+    %{conv | status: 200, resp_body: resp_body}
   end
 
   def route(%Conv{method: "GET", path: "/kaboom"} = _conv) do
