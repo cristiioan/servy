@@ -5,9 +5,9 @@ defmodule Servy.Plugins do
 
   def track(%Conv{status: 404, path: path} = conv) do
     if Mix.env() != :test do
-      Logger.warn("Warning: #{path} is on the loose!")
+      IO.puts("Warning: #{path} is on the loose!")
+      Servy.FourOhFourCounter.bump_count(path)
     end
-
     conv
   end
 
@@ -30,12 +30,4 @@ defmodule Servy.Plugins do
   end
 
   def rewrite_path_captures(conv, nil), do: conv
-
-  def log(conv) do
-    if Mix.env() == :dev do
-      Logger.info(conv)
-    end
-
-    conv
-  end
 end
